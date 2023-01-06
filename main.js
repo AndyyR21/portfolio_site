@@ -5,14 +5,14 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 let scene, camera, renderer, controls, pointLight;
 // geometry
-let sphere, star;
+let sphere, star, nodes = [];
 function init(){
   
   scene = new THREE.Scene();
 
   camera = new THREE.PerspectiveCamera(
     45,
-    window.innerHeight / window.innerHeight,
+    window.innerWidth / window.innerHeight,
     0.1,
     1000
   );
@@ -30,14 +30,15 @@ function init(){
     THREE.SphereGeometry(4, 32, 16), 
     new THREE.MeshBasicMaterial( {
       color: 0xff6347,
-      //wireframe: true,
-      transparent: true,
-      opacity: .2
+      wireframe: true,
+      // transparent: true,
+      // opacity: .2
       }
     )
   );
   scene.add( sphere );
-
+    
+  add_nodes();
   pointLight = new THREE.PointLight(0xffffff);
   pointLight.position.set(5,5,5);
 
@@ -46,7 +47,7 @@ function init(){
 
   controls = new OrbitControls(camera, renderer.domElement);
   // to disable zoom
-  controls.enableZoom = false;
+  // controls.enableZoom = false;
 
   // to disable rotation
   // controls.enableRotate = false;
@@ -59,8 +60,27 @@ function init(){
 }
 
 function add_nodes() {
-  
+  const vector = new THREE.Vector3();
+  // Add some nodes to the surface of the sphere
+  const nodeGeometry = new THREE.SphereGeometry(0.4, 8, 8);
+  const nodeMaterial = new THREE.MeshBasicMaterial({color: 0x000Aff});
+  for(let i = 0; i < 5; i++){
+    // Generate a random position on the surface of the sphere
+    const u = Math.random() * Math.PI * 2;
+    const v = Math.random() * Math.PI * 2;
+    const x = Math.cos(u) * Math.sin(v) * 4;
+    const y = Math.cos(v) * 4;
+    const z = Math.sin(u) * Math.sin(v) * 4;
+    const position = new THREE.Vector3(x, y, z);
+
+    // Create the node and set its position
+    const node = new THREE.Mesh(nodeGeometry, nodeMaterial);
+    node.position.copy(position);
+    sphere.add(node);
+    nodes.push(node);
+  }
 }
+
 function add_star() {
   // create star geometry
   star = new THREE.Mesh(
@@ -78,8 +98,8 @@ function add_star() {
 
 function animate() {
   requestAnimationFrame(animate);
-  sphere.rotation.y += .01;
-  sphere.rotation.x += .01;
+  sphere.rotation.y += .004;
+  sphere.rotation.x += .002;
   controls.update();
   renderer.render(scene, camera);
 }
